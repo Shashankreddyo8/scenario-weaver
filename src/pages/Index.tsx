@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import ScenarioInput from "@/components/ScenarioInput";
 import AgentPipeline from "@/components/AgentPipeline";
 import ScenarioCard from "@/components/ScenarioCard";
