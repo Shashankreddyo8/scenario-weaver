@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import ScenarioInput from "@/components/ScenarioInput";
 import AgentPipeline from "@/components/AgentPipeline";
 import ScenarioCard from "@/components/ScenarioCard";
@@ -24,8 +25,9 @@ export default function Index() {
     try {
       const simResult = await runSimulation(input, setAgents);
       setResult(simResult);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Simulation error:", e);
+      toast.error(e?.message || "Simulation failed. Please try again.");
     } finally {
       setIsRunning(false);
     }
