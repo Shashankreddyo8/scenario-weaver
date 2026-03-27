@@ -25,8 +25,9 @@ export default function Index() {
     try {
       const simResult = await runSimulation(input, setAgents);
       setResult(simResult);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Simulation error:", e);
+      toast.error(e?.message || "Simulation failed. Please try again.");
     } finally {
       setIsRunning(false);
     }
