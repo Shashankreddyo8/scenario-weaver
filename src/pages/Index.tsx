@@ -1,12 +1,13 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Sparkles } from "lucide-react";
+import { Brain, Sparkles, LayoutGrid, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import ScenarioInput from "@/components/ScenarioInput";
 import AgentPipeline from "@/components/AgentPipeline";
 import ScenarioCard from "@/components/ScenarioCard";
 import SimulationStatus from "@/components/SimulationStatus";
 import KnowledgePanel from "@/components/KnowledgePanel";
+import RelationshipGraph from "@/components/RelationshipGraph";
 import { Agent, AGENTS, SimulationResult } from "@/lib/simulation-types";
 import { runSimulation } from "@/lib/simulation-engine";
 
@@ -15,11 +16,13 @@ export default function Index() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [lastInput, setLastInput] = useState("");
+  const [activeView, setActiveView] = useState<"scenarios" | "graph">("scenarios");
 
   const handleRun = useCallback(async (input: string) => {
     setIsRunning(true);
     setResult(null);
     setLastInput(input);
+    setActiveView("scenarios");
     setAgents(AGENTS.map(a => ({ ...a, status: "pending", output: undefined })));
 
     try {
@@ -64,7 +67,7 @@ export default function Index() {
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span className="font-mono">8 Agents • LangGraph</span>
+              <span className="font-mono">10 Agents • Graph Reasoning</span>
             </div>
           </div>
         </header>
@@ -83,7 +86,7 @@ export default function Index() {
                     Simulate the Future
                   </h2>
                   <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                    Enter any scenario. Our multi-agent AI system analyzes, simulates, and generates possible outcomes.
+                    Enter any scenario. Our multi-agent AI system analyzes, builds relationship graphs, and generates possible outcomes.
                   </p>
                 </motion.div>
               )}
@@ -120,16 +123,53 @@ export default function Index() {
                     <AgentPipeline agents={agents} />
                   </div>
 
-                  {/* Center: Scenario Cards */}
+                  {/* Center: Tabs + Content */}
                   <div className="lg:col-span-6">
                     {result ? (
-                      <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                          Generated Scenarios
-                        </h3>
-                        {result.scenarios.map((s, i) => (
-                          <ScenarioCard key={s.id} scenario={s} index={i} />
-                        ))}
+                      <div>
+                        {/* View toggle */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <button
+                            onClick={() => setActiveView("scenarios")}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                              activeView === "scenarios"
+                                ? "bg-primary/15 text-primary border border-primary/30"
+                                : "bg-secondary/50 text-muted-foreground border border-border/40 hover:text-foreground"
+                            }`}
+                          >
+                            <LayoutGrid className="w-3.5 h-3.5" />
+                            Scenarios
+                          </button>
+                          {result.graph && (
+                            <button
+                              onClick={() => setActiveView("graph")}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                activeView === "graph"
+                                  ? "bg-primary/15 text-primary border border-primary/30"
+                                  : "bg-secondary/50 text-muted-foreground border border-border/40 hover:text-foreground"
+                              }`}
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                              Relationship Graph
+                              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-accent/20 text-accent text-[10px]">
+                                {result.graph.nodes.length} nodes
+                              </span>
+                            </button>
+                          )}
+                        </div>
+
+                        {activeView === "scenarios" ? (
+                          <div className="space-y-4">
+                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                              Generated Scenarios
+                            </h3>
+                            {result.scenarios.map((s, i) => (
+                              <ScenarioCard key={s.id} scenario={s} index={i} />
+                            ))}
+                          </div>
+                        ) : result.graph ? (
+                          <RelationshipGraph graph={result.graph} />
+                        ) : null}
                       </div>
                     ) : (
                       <div className="flex items-center justify-center h-64">

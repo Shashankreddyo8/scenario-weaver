@@ -6,19 +6,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent scenario simulation engine. You must analyze the user's scenario input and produce a structured JSON response simulating multiple possible futures.
+const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent scenario simulation engine with graph-based reasoning. You must analyze the user's scenario input and produce a structured JSON response simulating multiple possible futures using relationship graphs.
 
-You operate as 8 coordinated agents in sequence:
+You operate as 10 coordinated agents in sequence:
 1. Input Analysis: Parse the scenario, extract entities, keywords, intent
 2. Knowledge Retrieval: Recall relevant historical events, political/economic patterns
 3. Actor Identification: Identify key actors (countries, groups, systems) with goals and capabilities
-4. Strategy Analysis: Predict possible actions for each actor
-5. Chain Simulation: Simulate chain reactions between actors
-6. Scenario Generation: Generate 3-4 distinct possible outcome scenarios
-7. Probability Assessment: Assign probability levels (High/Medium/Low)
-8. Explanation: Explain reasoning for each scenario
+4. Graph Builder: Construct a relationship graph with actors as nodes and their relationships (ally, enemy, neutral, influence, dependency) as edges with strength scores
+5. Graph Reasoning: Traverse the graph to detect alliances, conflict clusters, central actors, cascading effects, escalation paths, and indirect relationships
+6. Strategy Analysis: Predict possible actions for each actor, informed by graph centrality and edge strengths
+7. Chain Simulation: Simulate chain reactions between actors using graph paths
+8. Scenario Generation: Generate 4 distinct possible outcome scenarios
+9. Probability Assessment: Assign probability levels (High/Medium/Low)
+10. Explanation: Explain reasoning for each scenario, referencing graph relationships
 
-Your reasoning must be grounded in real-world patterns, historical precedents, and geopolitical/economic logic.`;
+Your reasoning must be grounded in real-world patterns, historical precedents, and network/graph logic.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -39,7 +41,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const userPrompt = `Analyze this scenario and run a full multi-agent simulation:
+    const userPrompt = `Analyze this scenario and run a full multi-agent simulation with graph-based reasoning:
 
 "${scenario}"
 
@@ -57,21 +59,38 @@ Return your analysis as a JSON object with this exact structure:
       }
     ],
     "actionsPredicted": ["Action 1 predicted", "Action 2 predicted"],
+    "graphBuilderSummary": "Brief summary of the relationship graph constructed",
+    "graphReasoningSummary": "Brief summary of graph-based insights (clusters, central actors, indirect relationships)",
     "simulationSummary": "Brief summary of simulation paths explored"
+  },
+  "graph": {
+    "nodes": [
+      { "id": "unique-id", "label": "Display Name", "type": "country|organization|person|event", "importance": 0.0-1.0 }
+    ],
+    "edges": [
+      { "source": "node-id", "target": "node-id", "type": "ally|enemy|neutral|influence|dependency", "strength": 0.0-1.0, "label": "Brief description" }
+    ]
   },
   "scenarios": [
     {
       "title": "Short descriptive title",
-      "probability": "High" | "Medium" | "Low",
+      "probability": "High|Medium|Low",
       "summary": "2-3 sentence summary",
       "details": "Detailed 3-5 sentence explanation of how this unfolds",
       "chainReactions": ["Step 1 → Consequence 1", "Step 2 → Consequence 2", "Step 3 → Consequence 3", "Step 4 → Consequence 4"],
-      "reasoning": "Why this scenario is plausible based on evidence and patterns"
+      "reasoning": "Why this scenario is plausible based on graph relationships and evidence"
     }
   ]
 }
 
-Generate exactly 4 scenarios with varying probabilities. Make them specific to the actual scenario, not generic templates. Use real country names, organizations, and historical parallels where relevant.`;
+IMPORTANT RULES:
+- Generate exactly 4 scenarios with varying probabilities
+- Generate 5-10 graph nodes representing key actors/entities
+- Generate 8-15 graph edges representing relationships between them
+- Node IDs must be lowercase-kebab-case (e.g., "united-states", "nato")
+- Edge source/target must reference valid node IDs
+- Make scenarios specific, not generic. Use real names and historical parallels
+- Use graph reasoning: reference alliances, conflicts, centrality, and indirect relationships in scenario reasoning`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -113,7 +132,6 @@ Generate exactly 4 scenarios with varying probabilities. Make them specific to t
     const aiData = await response.json();
     const content = aiData.choices?.[0]?.message?.content || "";
 
-    // Extract JSON from the response (handle markdown code blocks)
     let jsonStr = content;
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
