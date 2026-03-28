@@ -16,24 +16,20 @@ export async function runSimulation(
     onAgentUpdate([...agents]);
   };
 
-  // Animate agents running while waiting for AI
   const animateAgents = async () => {
-    const agentIds = ["input", "rag", "actor", "strategy", "simulation", "scenario", "probability", "explanation"];
+    const agentIds = ["input", "rag", "actor", "graph-build", "graph-reason", "strategy", "simulation", "scenario", "probability", "explanation"];
     for (const id of agentIds) {
       await updateAgent(id, "running");
-      await delay(400 + Math.random() * 600);
-      // Don't mark complete yet — we'll do that after AI responds
+      await delay(350 + Math.random() * 500);
     }
   };
 
-  // Start animation and AI call in parallel
   const animationPromise = animateAgents();
 
   const { data, error } = await supabase.functions.invoke("simulate", {
     body: { scenario: input },
   });
 
-  // Wait for animation to finish
   await animationPromise;
 
   if (error) {
@@ -44,25 +40,25 @@ export async function runSimulation(
     throw new Error(data.error);
   }
 
-  // Mark all agents complete with outputs from AI
   const agentOutputs = data?.agentOutputs || {};
   await updateAgent("input", "complete", agentOutputs.inputAnalysis || "Analysis complete");
-  await updateAgent("rag", "complete", `Retrieved ${(data?.agentOutputs?.knowledgeRetrieved || []).length} sources`);
-  await updateAgent("actor", "complete", `Identified ${(data?.agentOutputs?.actorsIdentified || []).length} actors`);
-  await updateAgent("strategy", "complete", `Predicted ${(data?.agentOutputs?.actionsPredicted || []).length} actions`);
+  await updateAgent("rag", "complete", `Retrieved ${(agentOutputs.knowledgeRetrieved || []).length} sources`);
+  await updateAgent("actor", "complete", `Identified ${(agentOutputs.actorsIdentified || []).length} actors`);
+  await updateAgent("graph-build", "complete", agentOutputs.graphBuilderSummary || "Graph constructed");
+  await updateAgent("graph-reason", "complete", agentOutputs.graphReasoningSummary || "Graph analysis complete");
+  await updateAgent("strategy", "complete", `Predicted ${(agentOutputs.actionsPredicted || []).length} actions`);
   await updateAgent("simulation", "complete", agentOutputs.simulationSummary || "Simulation complete");
   await updateAgent("scenario", "complete", `Generated ${(data?.scenarios || []).length} scenarios`);
   await updateAgent("probability", "complete", "Probabilities assigned");
   await updateAgent("explanation", "complete", "Reasoning chains complete");
 
-  // Map AI response to our types
   const scenarios = (data?.scenarios || []).map((s: any, i: number) => ({
     id: `scenario-${i}`,
     title: s.title || `Scenario ${i + 1}`,
     probability: s.probability || "Medium",
     summary: s.summary || "",
     details: s.details || "",
-    actors: (data?.agentOutputs?.actorsIdentified || []).slice(0, 2 + (i % 2)).map((a: any) => ({
+    actors: (agentOutputs.actorsIdentified || []).slice(0, 2 + (i % 2)).map((a: any) => ({
       name: a.name || "Unknown",
       role: a.role || "Actor",
       goals: a.goals || [],
@@ -72,16 +68,33 @@ export async function runSimulation(
     reasoning: s.reasoning || "",
   }));
 
+  const graph = data?.graph ? {
+    nodes: (data.graph.nodes || []).map((n: any) => ({
+      id: n.id,
+      label: n.label || n.id,
+      type: n.type || "organization",
+      importance: n.importance ?? 0.5,
+    })),
+    edges: (data.graph.edges || []).map((e: any) => ({
+      source: e.source,
+      target: e.target,
+      type: e.type || "neutral",
+      strength: e.strength ?? 0.5,
+      label: e.label,
+    })),
+  } : undefined;
+
   return {
     scenarios,
     agents,
-    knowledgeRetrieved: data?.agentOutputs?.knowledgeRetrieved || [],
-    actorsIdentified: (data?.agentOutputs?.actorsIdentified || []).map((a: any) => ({
+    knowledgeRetrieved: agentOutputs.knowledgeRetrieved || [],
+    actorsIdentified: (agentOutputs.actorsIdentified || []).map((a: any) => ({
       name: a.name || "Unknown",
       role: a.role || "Actor",
       goals: a.goals || [],
       capabilities: a.capabilities || [],
     })),
-    actionsPredicted: data?.agentOutputs?.actionsPredicted || [],
+    actionsPredicted: agentOutputs.actionsPredicted || [],
+    graph,
   };
 }
