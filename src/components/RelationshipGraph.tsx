@@ -111,9 +111,10 @@ interface SelectedNodeInfo {
 
 interface RelationshipGraphProps {
   graph: SimulationGraph;
+  onNodeSelect?: (label: string | null) => void;
 }
 
-export default function RelationshipGraph({ graph }: RelationshipGraphProps) {
+export default function RelationshipGraph({ graph, onNodeSelect }: RelationshipGraphProps) {
   const initialNodes = useMemo(() => arrangeNodes(graph.nodes), [graph.nodes]);
   const initialEdges = useMemo(() => buildEdges(graph.edges), [graph.edges]);
 
@@ -133,7 +134,13 @@ export default function RelationshipGraph({ graph }: RelationshipGraphProps) {
       e => e.source === graphNode.id || e.target === graphNode.id
     );
     setSelected({ node: graphNode, edges: relatedEdges });
-  }, [graph.edges]);
+    onNodeSelect?.(graphNode.label);
+  }, [graph.edges, onNodeSelect]);
+
+  const closePanel = () => {
+    setSelected(null);
+    onNodeSelect?.(null);
+  };
 
   return (
     <motion.div
@@ -197,7 +204,7 @@ export default function RelationshipGraph({ graph }: RelationshipGraphProps) {
             className="absolute top-0 right-0 w-72 h-full glass-strong border-l border-border/50 p-5 overflow-y-auto z-20"
           >
             <button
-              onClick={() => setSelected(null)}
+              onClick={closePanel}
               className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
             >
               <X className="w-4 h-4" />

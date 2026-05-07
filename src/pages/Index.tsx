@@ -17,6 +17,7 @@ export default function Index() {
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [lastInput, setLastInput] = useState("");
   const [activeView, setActiveView] = useState<"scenarios" | "graph">("scenarios");
+  const [highlightActor, setHighlightActor] = useState<string | null>(null);
 
   const handleRun = useCallback(async (input: string) => {
     setIsRunning(true);
@@ -160,15 +161,31 @@ export default function Index() {
 
                         {activeView === "scenarios" ? (
                           <div className="space-y-4">
-                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                              Generated Scenarios
-                            </h3>
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                                Generated Scenarios
+                              </h3>
+                              {highlightActor && (
+                                <button
+                                  onClick={() => setHighlightActor(null)}
+                                  className="text-[11px] px-2 py-1 rounded-full bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 transition-colors"
+                                >
+                                  Filtering: {highlightActor} ✕
+                                </button>
+                              )}
+                            </div>
                             {result.scenarios.map((s, i) => (
-                              <ScenarioCard key={s.id} scenario={s} index={i} />
+                              <ScenarioCard key={s.id} scenario={s} index={i} highlightActor={highlightActor} />
                             ))}
                           </div>
                         ) : result.graph ? (
-                          <RelationshipGraph graph={result.graph} />
+                          <RelationshipGraph
+                            graph={result.graph}
+                            onNodeSelect={(label) => {
+                              setHighlightActor(label);
+                              if (label) setActiveView("scenarios");
+                            }}
+                          />
                         ) : null}
                       </div>
                     ) : (

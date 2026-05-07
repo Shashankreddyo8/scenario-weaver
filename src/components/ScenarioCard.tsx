@@ -6,6 +6,7 @@ import { SimulationScenario } from "@/lib/simulation-types";
 interface ScenarioCardProps {
   scenario: SimulationScenario;
   index: number;
+  highlightActor?: string | null;
 }
 
 const probabilityColors: Record<string, string> = {
@@ -14,15 +15,23 @@ const probabilityColors: Record<string, string> = {
   Low: "bg-probability-low/15 text-probability-low border-probability-low/30",
 };
 
-export default function ScenarioCard({ scenario, index }: ScenarioCardProps) {
+export default function ScenarioCard({ scenario, index, highlightActor }: ScenarioCardProps) {
   const [expanded, setExpanded] = useState(false);
+
+  const matches = !!highlightActor && scenario.actors.some(
+    a => a.name.toLowerCase().includes(highlightActor.toLowerCase()) ||
+         highlightActor.toLowerCase().includes(a.name.toLowerCase())
+  );
+  const dimmed = !!highlightActor && !matches;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: dimmed ? 0.35 : 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
-      className="glass rounded-2xl overflow-hidden gradient-border hover:glow-primary transition-shadow duration-500"
+      className={`glass rounded-2xl overflow-hidden gradient-border transition-all duration-500 ${
+        matches ? "ring-2 ring-primary glow-primary" : "hover:glow-primary"
+      }`}
     >
       <div
         className="p-5 cursor-pointer"
