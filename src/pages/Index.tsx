@@ -17,6 +17,7 @@ export default function Index() {
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [lastInput, setLastInput] = useState("");
   const [activeView, setActiveView] = useState<"scenarios" | "graph">("scenarios");
+  const [highlightActor, setHighlightActor] = useState<string | null>(null);
 
   const handleRun = useCallback(async (input: string) => {
     setIsRunning(true);
