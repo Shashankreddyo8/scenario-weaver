@@ -111,9 +111,10 @@ interface SelectedNodeInfo {
 
 interface RelationshipGraphProps {
   graph: SimulationGraph;
+  onNodeSelect?: (label: string | null) => void;
 }
 
-export default function RelationshipGraph({ graph }: RelationshipGraphProps) {
+export default function RelationshipGraph({ graph, onNodeSelect }: RelationshipGraphProps) {
   const initialNodes = useMemo(() => arrangeNodes(graph.nodes), [graph.nodes]);
   const initialEdges = useMemo(() => buildEdges(graph.edges), [graph.edges]);
 
