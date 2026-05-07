@@ -134,7 +134,13 @@ export default function RelationshipGraph({ graph, onNodeSelect }: RelationshipG
       e => e.source === graphNode.id || e.target === graphNode.id
     );
     setSelected({ node: graphNode, edges: relatedEdges });
-  }, [graph.edges]);
+    onNodeSelect?.(graphNode.label);
+  }, [graph.edges, onNodeSelect]);
+
+  const closePanel = () => {
+    setSelected(null);
+    onNodeSelect?.(null);
+  };
 
   return (
     <motion.div
