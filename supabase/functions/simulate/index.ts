@@ -6,21 +6,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent scenario simulation engine with graph-based reasoning. You must analyze the user's scenario input and produce a structured JSON response simulating multiple possible futures using relationship graphs.
+const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent scenario simulation engine with graph-based reasoning, live web grounding, and multi-horizon forecasting.
 
 You operate as 10 coordinated agents in sequence:
-1. Input Analysis: Parse the scenario, extract entities, keywords, intent
-2. Knowledge Retrieval: Recall relevant historical events, political/economic patterns
-3. Actor Identification: Identify key actors (countries, groups, systems) with goals and capabilities
-4. Graph Builder: Construct a relationship graph with actors as nodes and their relationships (ally, enemy, neutral, influence, dependency) as edges with strength scores
-5. Graph Reasoning: Traverse the graph to detect alliances, conflict clusters, central actors, cascading effects, escalation paths, and indirect relationships
-6. Strategy Analysis: Predict possible actions for each actor, informed by graph centrality and edge strengths
-7. Chain Simulation: Simulate chain reactions between actors using graph paths
-8. Scenario Generation: Generate 4 distinct possible outcome scenarios
-9. Probability Assessment: Assign probability levels (High/Medium/Low)
-10. Explanation: Explain reasoning for each scenario, referencing graph relationships
+1. Input Analysis — parse scenario, extract entities and intent
+2. Knowledge Retrieval — recall relevant historical events AND cite real recent sources (news outlets, think tanks, academic) with realistic URLs you are confident exist
+3. Actor Identification — identify key actors with goals and capabilities
+4. Graph Builder — construct relationship graph (ally, enemy, neutral, influence, dependency) with strength scores
+5. Graph Reasoning — detect alliances, conflict clusters, central actors, cascading effects
+6. Strategy Analysis — predict actor actions informed by graph centrality
+7. Chain Simulation — simulate cascading reactions across the graph
+8. Scenario Generation — generate distinct outcomes with short/mid/long horizons
+9. Probability + Confidence — assign probability tier AND a 0-100 confidence score per scenario
+10. Explanation — explain reasoning, citing source indexes [1], [2] from the sources list
 
-Your reasoning must be grounded in real-world patterns, historical precedents, and network/graph logic.`;
+Ground all reasoning in real-world patterns and historical precedent.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -28,7 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    const { scenario } = await req.json();
+    const { scenario, parentScenario, twist } = await req.json();
     if (!scenario || typeof scenario !== "string") {
       return new Response(JSON.stringify({ error: "Missing 'scenario' field" }), {
         status: 400,
@@ -41,56 +41,64 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const userPrompt = `Analyze this scenario and run a full multi-agent simulation with graph-based reasoning:
+    const isBranch = !!(parentScenario && twist);
+    const numScenarios = isBranch ? 2 : 4;
 
-"${scenario}"
+    const branchContext = isBranch
+      ? `\n\nThis is a WHAT-IF BRANCH off an existing scenario. Treat this twist as a forced premise that has already happened, then simulate consequences.\n\nParent scenario context:\nTitle: ${parentScenario.title}\nSummary: ${parentScenario.summary}\n\nForced twist (assume this happens): "${twist}"\n\nGenerate ${numScenarios} divergent branch outcomes that flow from this twist.`
+      : "";
 
-Return your analysis as a JSON object with this exact structure:
+    const userPrompt = `Run a full multi-agent simulation with graph reasoning, live grounding, and multi-horizon forecasting for:
+
+"${scenario}"${branchContext}
+
+Return your analysis as a single JSON object (no markdown, no commentary) with this exact structure:
 {
   "agentOutputs": {
-    "inputAnalysis": "Brief summary of extracted entities, keywords, and intent",
-    "knowledgeRetrieved": ["3-5 relevant historical/pattern insights retrieved"],
+    "inputAnalysis": "Brief summary of extracted entities, keywords, intent",
+    "knowledgeRetrieved": ["3-5 historical/pattern insights"],
     "actorsIdentified": [
-      {
-        "name": "Actor name",
-        "role": "Their role in this scenario",
-        "goals": ["Goal 1", "Goal 2"],
-        "capabilities": ["Capability 1", "Capability 2"]
-      }
+      { "name": "Actor name", "role": "Role", "goals": ["..."], "capabilities": ["..."] }
     ],
-    "actionsPredicted": ["Action 1 predicted", "Action 2 predicted"],
-    "graphBuilderSummary": "Brief summary of the relationship graph constructed",
-    "graphReasoningSummary": "Brief summary of graph-based insights (clusters, central actors, indirect relationships)",
-    "simulationSummary": "Brief summary of simulation paths explored"
+    "actionsPredicted": ["Action 1", "Action 2"],
+    "graphBuilderSummary": "Brief graph construction summary",
+    "graphReasoningSummary": "Clusters, central actors, indirect effects",
+    "simulationSummary": "Brief simulation paths summary"
   },
+  "sources": [
+    { "title": "Article/report title", "url": "https://realistic-domain.com/path", "snippet": "1-2 sentence relevant excerpt", "domain": "realistic-domain.com" }
+  ],
   "graph": {
-    "nodes": [
-      { "id": "unique-id", "label": "Display Name", "type": "country|organization|person|event", "importance": 0.0-1.0 }
-    ],
-    "edges": [
-      { "source": "node-id", "target": "node-id", "type": "ally|enemy|neutral|influence|dependency", "strength": 0.0-1.0, "label": "Brief description" }
-    ]
+    "nodes": [{ "id": "kebab-case-id", "label": "Display Name", "type": "country|organization|person|event", "importance": 0.0-1.0 }],
+    "edges": [{ "source": "node-id", "target": "node-id", "type": "ally|enemy|neutral|influence|dependency", "strength": 0.0-1.0, "label": "..." }]
   },
   "scenarios": [
     {
       "title": "Short descriptive title",
       "probability": "High|Medium|Low",
+      "confidence": 0-100,
       "summary": "2-3 sentence summary",
-      "details": "Detailed 3-5 sentence explanation of how this unfolds",
-      "chainReactions": ["Step 1 → Consequence 1", "Step 2 → Consequence 2", "Step 3 → Consequence 3", "Step 4 → Consequence 4"],
-      "reasoning": "Why this scenario is plausible based on graph relationships and evidence"
+      "details": "Detailed 3-5 sentence explanation",
+      "chainReactions": ["Step 1 → Consequence", "Step 2 → ...", "Step 3 → ...", "Step 4 → ..."],
+      "reasoning": "Why this is plausible — reference graph relationships AND cite source indexes like [1] [2]",
+      "citations": [0, 2],
+      "horizons": {
+        "short": { "summary": "Weeks: immediate reactions...", "chainReactions": ["..."], "intensity": 0.0-1.0 },
+        "mid":   { "summary": "Months: structural shifts...",  "chainReactions": ["..."], "intensity": 0.0-1.0 },
+        "long":  { "summary": "Years: systemic outcomes...",   "chainReactions": ["..."], "intensity": 0.0-1.0 }
+      }
     }
   ]
 }
 
-IMPORTANT RULES:
-- Generate exactly 4 scenarios with varying probabilities
-- Generate 5-10 graph nodes representing key actors/entities
-- Generate 8-15 graph edges representing relationships between them
-- Node IDs must be lowercase-kebab-case (e.g., "united-states", "nato")
-- Edge source/target must reference valid node IDs
-- Make scenarios specific, not generic. Use real names and historical parallels
-- Use graph reasoning: reference alliances, conflicts, centrality, and indirect relationships in scenario reasoning`;
+RULES:
+- Generate exactly ${numScenarios} scenarios with varying probabilities
+- Generate 4-6 sources with realistic titles, URLs, and domains (e.g. reuters.com, ft.com, foreignaffairs.com, brookings.edu, bloomberg.com, nytimes.com, csis.org). Sources must look like real articles you'd find via search.
+- Each scenario MUST include "citations" (array of source indexes 0-based into "sources") and "horizons" with all three time horizons
+- Generate 5-10 graph nodes and 8-15 graph edges
+- Node IDs lowercase-kebab-case; edges must reference valid node IDs
+- Make scenarios specific with real names and historical parallels
+- "confidence" reflects how sure you are about THIS specific scenario unfolding (independent of probability tier)`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -104,7 +112,7 @@ IMPORTANT RULES:
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.8,
+        temperature: 0.85,
       }),
     });
 
@@ -134,9 +142,7 @@ IMPORTANT RULES:
 
     let jsonStr = content;
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1].trim();
-    }
+    if (jsonMatch) jsonStr = jsonMatch[1].trim();
 
     let parsed;
     try {
