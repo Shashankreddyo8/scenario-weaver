@@ -6,6 +6,7 @@ import { SimulationScenario } from "@/lib/simulation-types";
 interface ScenarioCardProps {
   scenario: SimulationScenario;
   index: number;
+  highlightActor?: string | null;
 }
 
 const probabilityColors: Record<string, string> = {
