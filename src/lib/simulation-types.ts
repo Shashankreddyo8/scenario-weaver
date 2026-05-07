@@ -37,15 +37,37 @@ export interface Actor {
   capabilities: string[];
 }
 
+export interface Source {
+  title: string;
+  url: string;
+  snippet?: string;
+  domain?: string;
+}
+
+export interface HorizonForecast {
+  summary: string;
+  chainReactions: string[];
+  intensity: number; // 0-1
+}
+
 export interface SimulationScenario {
   id: string;
   title: string;
   probability: ProbabilityLevel;
+  confidence: number; // 0-100
   summary: string;
   details: string;
   actors: Actor[];
   chainReactions: string[];
   reasoning: string;
+  citations: number[]; // indexes into result.sources
+  horizons?: {
+    short: HorizonForecast;
+    mid: HorizonForecast;
+    long: HorizonForecast;
+  };
+  branches?: SimulationScenario[]; // what-if branches
+  parentTwist?: string;
 }
 
 export interface SimulationResult {
@@ -55,6 +77,7 @@ export interface SimulationResult {
   actorsIdentified: Actor[];
   actionsPredicted: string[];
   graph?: SimulationGraph;
+  sources: Source[];
 }
 
 export const AGENTS: Agent[] = [
