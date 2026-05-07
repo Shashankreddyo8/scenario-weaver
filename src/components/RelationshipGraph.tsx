@@ -204,7 +204,7 @@ export default function RelationshipGraph({ graph, onNodeSelect }: RelationshipG
             className="absolute top-0 right-0 w-72 h-full glass-strong border-l border-border/50 p-5 overflow-y-auto z-20"
           >
             <button
-              onClick={() => setSelected(null)}
+              onClick={closePanel}
               className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
             >
               <X className="w-4 h-4" />
