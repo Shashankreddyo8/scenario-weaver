@@ -285,6 +285,19 @@ export default function Index() {
             </motion.section>
           )}
         </AnimatePresence>
+
+        <footer className="border-t border-border/40 mt-12">
+          <div className="container max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 font-mono">
+              <Brain className="w-3.5 h-3.5 text-primary" />
+              <span>ScenarioMind · Multi-agent reasoning engine</span>
+            </div>
+            <div className="flex items-center gap-4 font-mono">
+              <span>Gemini · Live grounding · React Flow</span>
+              <span className="hidden md:inline">© {new Date().getFullYear()}</span>
+            </div>
+          </div>
+        </footer>
       </div>
 
       <WhatIfDialog
