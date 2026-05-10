@@ -151,6 +151,8 @@ export default function Index() {
               onRegenerate={handleRegenerate}
               isRunning={isRunning}
               hasResults={!!result}
+              value={inputValue}
+              onChange={setInputValue}
             />
 
             {!showPipeline && <ScenarioTemplates onSelect={handleTemplate} />}
