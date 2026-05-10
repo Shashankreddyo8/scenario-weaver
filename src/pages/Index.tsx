@@ -25,12 +25,13 @@ export default function Index() {
   const [whatIfTarget, setWhatIfTarget] = useState<SimulationScenario | null>(null);
   const [branchLoading, setBranchLoading] = useState(false);
   const [presentation, setPresentation] = useState(false);
-  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState("");
 
   const handleRun = useCallback(async (input: string) => {
     setIsRunning(true);
     setResult(null);
     setLastInput(input);
+    setInputValue(input);
     setActiveView("scenarios");
     setHighlightActor(null);
     setAgents(AGENTS.map(a => ({ ...a, status: "pending", output: undefined })));
@@ -51,7 +52,7 @@ export default function Index() {
   }, [lastInput, handleRun]);
 
   const handleTemplate = useCallback((prompt: string) => {
-    setPendingPrompt(prompt);
+    setInputValue(prompt);
     handleRun(prompt);
   }, [handleRun]);
 
@@ -150,6 +151,8 @@ export default function Index() {
               onRegenerate={handleRegenerate}
               isRunning={isRunning}
               hasResults={!!result}
+              value={inputValue}
+              onChange={setInputValue}
             />
 
             {!showPipeline && <ScenarioTemplates onSelect={handleTemplate} />}
