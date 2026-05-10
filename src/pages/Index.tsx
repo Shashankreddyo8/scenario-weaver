@@ -100,26 +100,30 @@ export default function Index() {
       </div>
 
       <div className="relative z-10">
-        <header className="border-b border-border/40">
+        <header className="border-b border-border/40 backdrop-blur-md bg-background/40 sticky top-0 z-20">
           <div className="container max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center glow-primary">
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center glow-primary">
                 <Brain className="w-5 h-5 text-primary" />
+                <div className="absolute inset-0 rounded-xl ring-1 ring-primary/40" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground tracking-tight">ScenarioMind</h1>
-                <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-widest">Multi-Agent Simulation Engine</p>
+                <h1 className="text-lg font-bold tracking-tight text-gradient-primary">ScenarioMind</h1>
+                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-[0.18em]">Multi-Agent Simulation Engine</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-secondary/30 text-xs text-muted-foreground">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
+                </span>
                 <span className="font-mono">10 Agents · Graph · Multi-Horizon</span>
               </div>
               {result && (
                 <button
                   onClick={() => setPresentation(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 hover:glow-primary transition-all"
                 >
                   <Presentation className="w-3.5 h-3.5" />
                   Present
