@@ -88,35 +88,42 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Ambient background glow */}
+      {/* Ambient background: grid + aurora blobs */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-[0.03]"
-          style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }} />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full opacity-[0.03]"
-          style={{ background: "radial-gradient(circle, hsl(var(--accent)), transparent 70%)" }} />
+        <div className="absolute inset-0 grid-bg opacity-60" />
+        <div className="absolute top-[-15%] left-[-10%] w-[640px] h-[640px] rounded-full opacity-[0.18] animate-aurora blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.6), transparent 70%)" }} />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[560px] h-[560px] rounded-full opacity-[0.16] animate-aurora blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.6), transparent 70%)", animationDelay: "-6s" }} />
+        <div className="absolute top-[30%] right-[20%] w-[380px] h-[380px] rounded-full opacity-[0.10] animate-aurora blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.5), transparent 70%)", animationDelay: "-12s" }} />
       </div>
 
       <div className="relative z-10">
-        <header className="border-b border-border/40">
+        <header className="border-b border-border/40 backdrop-blur-md bg-background/40 sticky top-0 z-20">
           <div className="container max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center glow-primary">
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center glow-primary">
                 <Brain className="w-5 h-5 text-primary" />
+                <div className="absolute inset-0 rounded-xl ring-1 ring-primary/40" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground tracking-tight">ScenarioMind</h1>
-                <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-widest">Multi-Agent Simulation Engine</p>
+                <h1 className="text-lg font-bold tracking-tight text-gradient-primary">ScenarioMind</h1>
+                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-[0.18em]">Multi-Agent Simulation Engine</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-secondary/30 text-xs text-muted-foreground">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
+                </span>
                 <span className="font-mono">10 Agents · Graph · Multi-Horizon</span>
               </div>
               {result && (
                 <button
                   onClick={() => setPresentation(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 hover:glow-primary transition-all"
                 >
                   <Presentation className="w-3.5 h-3.5" />
                   Present
@@ -132,15 +139,26 @@ export default function Index() {
             <AnimatePresence>
               {!showPipeline && (
                 <motion.div
-                  initial={{ opacity: 1 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.6 }}
                   className="text-center mb-10"
                 >
-                  <h2 className="text-4xl md:text-5xl font-bold text-gradient-primary mb-4">
-                    Simulate the Future
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full border border-primary/30 bg-primary/10 text-[11px] font-mono uppercase tracking-widest text-primary"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Powered by 10-agent reasoning
+                  </motion.div>
+                  <h2 className="text-5xl md:text-6xl font-bold mb-5 tracking-tight">
+                    <span className="shimmer-text">Simulate the Future</span>
                   </h2>
-                  <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                    Enter any scenario. Multi-agent AI builds relationship graphs, cites real sources, and forecasts across short, mid, and long horizons.
+                  <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                    Enter any scenario. Multi-agent AI builds relationship graphs, cites real sources, and forecasts across <span className="text-foreground">short</span>, <span className="text-foreground">mid</span>, and <span className="text-foreground">long</span> horizons.
                   </p>
                 </motion.div>
               )}
@@ -267,6 +285,19 @@ export default function Index() {
             </motion.section>
           )}
         </AnimatePresence>
+
+        <footer className="border-t border-border/40 mt-12">
+          <div className="container max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 font-mono">
+              <Brain className="w-3.5 h-3.5 text-primary" />
+              <span>ScenarioMind · Multi-agent reasoning engine</span>
+            </div>
+            <div className="flex items-center gap-4 font-mono">
+              <span>Gemini · Live grounding · React Flow</span>
+              <span className="hidden md:inline">© {new Date().getFullYear()}</span>
+            </div>
+          </div>
+        </footer>
       </div>
 
       <WhatIfDialog

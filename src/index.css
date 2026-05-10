@@ -173,4 +173,54 @@
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
+
+  @keyframes aurora {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
+    33% { transform: translate3d(40px, -30px, 0) scale(1.08); opacity: 0.7; }
+    66% { transform: translate3d(-30px, 30px, 0) scale(0.95); opacity: 0.55; }
+  }
+
+  .animate-aurora {
+    animation: aurora 18s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .shimmer-text {
+    background: linear-gradient(90deg, hsl(var(--foreground)) 0%, hsl(var(--primary)) 30%, hsl(var(--accent)) 50%, hsl(var(--primary)) 70%, hsl(var(--foreground)) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+  }
+
+  .hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
+  }
 }

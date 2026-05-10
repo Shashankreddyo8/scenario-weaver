@@ -28,10 +28,16 @@ export default function ScenarioInput({ onSubmit, onRegenerate, isRunning, hasRe
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="w-full max-w-3xl mx-auto"
+      className="w-full max-w-3xl mx-auto relative"
     >
-      <div className="glass-strong rounded-2xl p-2 glow-primary gradient-border">
-        <div className="flex gap-2">
+      {/* Outer glow halo */}
+      <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-primary/30 via-accent/30 to-primary/30 opacity-40 blur-xl pointer-events-none" />
+
+      <div className="relative glass-strong rounded-2xl p-2 glow-primary gradient-border">
+        <div className="flex gap-2 items-center">
+          <div className="pl-3 text-primary/70">
+            <Zap className="w-4 h-4" />
+          </div>
           <input
             type="text"
             value={input}
@@ -39,14 +45,14 @@ export default function ScenarioInput({ onSubmit, onRegenerate, isRunning, hasRe
             onKeyDown={e => e.key === "Enter" && handleSubmit()}
             placeholder="Enter a scenario (e.g., War between two countries)"
             disabled={isRunning}
-            className="flex-1 bg-transparent px-5 py-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base disabled:opacity-50"
+            className="flex-1 bg-transparent px-2 py-4 text-foreground placeholder:text-muted-foreground focus:outline-none text-base disabled:opacity-50"
           />
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleSubmit}
             disabled={isRunning || !input.trim()}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
+            className="relative overflow-hidden flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 shadow-lg shadow-primary/20"
           >
             <Zap className="w-4 h-4" />
             {isRunning ? "Running..." : "Run Simulation"}
