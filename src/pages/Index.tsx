@@ -88,12 +88,15 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Ambient background glow */}
+      {/* Ambient background: grid + aurora blobs */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-[0.03]"
-          style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }} />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full opacity-[0.03]"
-          style={{ background: "radial-gradient(circle, hsl(var(--accent)), transparent 70%)" }} />
+        <div className="absolute inset-0 grid-bg opacity-60" />
+        <div className="absolute top-[-15%] left-[-10%] w-[640px] h-[640px] rounded-full opacity-[0.18] animate-aurora blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.6), transparent 70%)" }} />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[560px] h-[560px] rounded-full opacity-[0.16] animate-aurora blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.6), transparent 70%)", animationDelay: "-6s" }} />
+        <div className="absolute top-[30%] right-[20%] w-[380px] h-[380px] rounded-full opacity-[0.10] animate-aurora blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.5), transparent 70%)", animationDelay: "-12s" }} />
       </div>
 
       <div className="relative z-10">
