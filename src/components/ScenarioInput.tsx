@@ -7,10 +7,17 @@ interface ScenarioInputProps {
   onRegenerate: () => void;
   isRunning: boolean;
   hasResults: boolean;
+  value?: string;
+  onChange?: (v: string) => void;
 }
 
-export default function ScenarioInput({ onSubmit, onRegenerate, isRunning, hasResults }: ScenarioInputProps) {
-  const [input, setInput] = useState("");
+export default function ScenarioInput({ onSubmit, onRegenerate, isRunning, hasResults, value, onChange }: ScenarioInputProps) {
+  const [internal, setInternal] = useState("");
+  const input = value !== undefined ? value : internal;
+  const setInput = (v: string) => {
+    if (onChange) onChange(v);
+    else setInternal(v);
+  };
 
   const handleSubmit = () => {
     if (input.trim() && !isRunning) onSubmit(input.trim());
