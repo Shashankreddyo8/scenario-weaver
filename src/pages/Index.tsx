@@ -139,15 +139,26 @@ export default function Index() {
             <AnimatePresence>
               {!showPipeline && (
                 <motion.div
-                  initial={{ opacity: 1 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.6 }}
                   className="text-center mb-10"
                 >
-                  <h2 className="text-4xl md:text-5xl font-bold text-gradient-primary mb-4">
-                    Simulate the Future
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full border border-primary/30 bg-primary/10 text-[11px] font-mono uppercase tracking-widest text-primary"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Powered by 10-agent reasoning
+                  </motion.div>
+                  <h2 className="text-5xl md:text-6xl font-bold mb-5 tracking-tight">
+                    <span className="shimmer-text">Simulate the Future</span>
                   </h2>
-                  <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                    Enter any scenario. Multi-agent AI builds relationship graphs, cites real sources, and forecasts across short, mid, and long horizons.
+                  <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                    Enter any scenario. Multi-agent AI builds relationship graphs, cites real sources, and forecasts across <span className="text-foreground">short</span>, <span className="text-foreground">mid</span>, and <span className="text-foreground">long</span> horizons.
                   </p>
                 </motion.div>
               )}
