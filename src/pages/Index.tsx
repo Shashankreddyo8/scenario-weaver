@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Sparkles, LayoutGrid, Share2, Presentation } from "lucide-react";
+import { Brain, Sparkles, LayoutGrid, Share2, Presentation, Database } from "lucide-react";
+import ProtocolUpload from "@/components/ProtocolUpload";
+import RetrievalDebugPanel from "@/components/RetrievalDebugPanel";
 import { toast } from "sonner";
 import ScenarioInput from "@/components/ScenarioInput";
 import AgentPipeline from "@/components/AgentPipeline";
@@ -26,6 +28,7 @@ export default function Index() {
   const [branchLoading, setBranchLoading] = useState(false);
   const [presentation, setPresentation] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [showUpload, setShowUpload] = useState(false);
 
   const handleRun = useCallback(async (input: string) => {
     setIsRunning(true);
@@ -129,6 +132,13 @@ export default function Index() {
                   Present
                 </button>
               )}
+              <button
+                onClick={() => setShowUpload(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-secondary/60 text-foreground border border-border/60 hover:bg-secondary transition-all"
+              >
+                <Database className="w-3.5 h-3.5" />
+                Protocols
+              </button>
               <ThemeToggle />
             </div>
           </div>
@@ -277,8 +287,9 @@ export default function Index() {
                     )}
                   </div>
 
-                  <div className="lg:col-span-3">
+                  <div className="lg:col-span-3 space-y-4">
                     {result && <KnowledgePanel result={result} />}
+                    {result && <RetrievalDebugPanel />}
                   </div>
                 </div>
               </div>
@@ -314,6 +325,8 @@ export default function Index() {
         scenarioInput={lastInput}
         onClose={() => setPresentation(false)}
       />
+
+      <ProtocolUpload open={showUpload} onClose={() => setShowUpload(false)} />
     </div>
   );
 }
