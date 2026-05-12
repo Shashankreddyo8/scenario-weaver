@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Sparkles, LayoutGrid, Share2, Presentation } from "lucide-react";
+import { Brain, Sparkles, LayoutGrid, Share2, Presentation, Database } from "lucide-react";
+import ProtocolUpload from "@/components/ProtocolUpload";
+import RetrievalDebugPanel from "@/components/RetrievalDebugPanel";
 import { toast } from "sonner";
 import ScenarioInput from "@/components/ScenarioInput";
 import AgentPipeline from "@/components/AgentPipeline";
