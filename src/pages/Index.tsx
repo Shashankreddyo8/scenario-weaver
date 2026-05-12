@@ -132,6 +132,13 @@ export default function Index() {
                   Present
                 </button>
               )}
+              <button
+                onClick={() => setShowUpload(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-secondary/60 text-foreground border border-border/60 hover:bg-secondary transition-all"
+              >
+                <Database className="w-3.5 h-3.5" />
+                Protocols
+              </button>
               <ThemeToggle />
             </div>
           </div>
