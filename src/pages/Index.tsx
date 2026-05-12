@@ -287,8 +287,9 @@ export default function Index() {
                     )}
                   </div>
 
-                  <div className="lg:col-span-3">
+                  <div className="lg:col-span-3 space-y-4">
                     {result && <KnowledgePanel result={result} />}
+                    {result && <RetrievalDebugPanel />}
                   </div>
                 </div>
               </div>
