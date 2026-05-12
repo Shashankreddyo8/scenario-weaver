@@ -325,6 +325,8 @@ export default function Index() {
         scenarioInput={lastInput}
         onClose={() => setPresentation(false)}
       />
+
+      <ProtocolUpload open={showUpload} onClose={() => setShowUpload(false)} />
     </div>
   );
 }
