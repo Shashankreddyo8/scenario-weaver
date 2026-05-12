@@ -28,6 +28,7 @@ export default function Index() {
   const [branchLoading, setBranchLoading] = useState(false);
   const [presentation, setPresentation] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [showUpload, setShowUpload] = useState(false);
 
   const handleRun = useCallback(async (input: string) => {
     setIsRunning(true);
