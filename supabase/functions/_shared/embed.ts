@@ -1,27 +1,22 @@
-// Embedding helper using Lovable AI Gateway (Gemini text-embedding-004 → 768 dims)
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
+// Embedding helper using Google AI Studio (text-embedding-004 → 768 dims)
+const URL = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:batchEmbedContents";
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
-  if (!key) throw new Error("LOVABLE_API_KEY missing");
-  const res = await fetch(`${GATEWAY}/embeddings`, {
+  const key = Deno.env.get("GEMINI_API_KEY");
+  if (!key) throw new Error("GEMINI_API_KEY missing");
+  const res = await fetch(`${URL}?key=${key}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": key,
-      "X-Lovable-AIG-SDK": "raw-fetch",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/text-embedding-004",
-      input: texts,
+      requests: texts.map((t) => ({
+        model: "models/text-embedding-004",
+        content: { parts: [{ text: t }] },
+      })),
     }),
   });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`embeddings ${res.status}: ${t}`);
-  }
+  if (!res.ok) throw new Error(`embeddings ${res.status}: ${await res.text()}`);
   const json = await res.json();
-  return (json.data || []).map((d: any) => d.embedding as number[]);
+  return (json.embeddings || []).map((e: any) => e.values as number[]);
 }
 
 export async function embedOne(text: string): Promise<number[]> {
