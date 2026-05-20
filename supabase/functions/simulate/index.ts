@@ -47,7 +47,49 @@ serve(async (req) => {
       ? `\n\nThis is a WHAT-IF BRANCH off an existing scenario. Treat this twist as a forced premise that has already happened, then simulate consequences.\n\nParent scenario context:\nTitle: ${parentScenario.title}\nSummary: ${parentScenario.summary}\n\nForced twist (assume this happens): "${twist}"\n\nGenerate ${numScenarios} divergent branch outcomes that flow from this twist.`
       : "";
 
-    const userPrompt = `Simulate: "${scenario}"${branchContext}
+    // === Fetch REAL sources via Firecrawl search ===
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+    let realSources: { title: string; url: string; snippet: string; domain: string }[] = [];
+    if (FIRECRAWL_API_KEY) {
+      try {
+        const searchQuery = isBranch
+          ? `${scenario} ${twist}`
+          : scenario;
+        const fc = await fetch("https://api.firecrawl.dev/v2/search", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: searchQuery, limit: 6, tbs: "qdr:y" }),
+        });
+        if (fc.ok) {
+          const fcJson = await fc.json();
+          const items: any[] = fcJson?.data?.web || fcJson?.data || [];
+          realSources = items.slice(0, 6).map((r: any) => {
+            const url: string = r.url || r.link || "";
+            let domain = "";
+            try { domain = new URL(url).hostname.replace(/^www\./, ""); } catch {}
+            return {
+              title: r.title || r.metadata?.title || domain || "Source",
+              url,
+              snippet: (r.description || r.snippet || r.content || "").slice(0, 300),
+              domain,
+            };
+          }).filter((s) => s.url.startsWith("http"));
+        } else {
+          console.error("Firecrawl search failed:", fc.status, await fc.text());
+        }
+      } catch (e) {
+        console.error("Firecrawl search error:", e);
+      }
+    }
+
+    const sourcesBlock = realSources.length
+      ? `\n\nREAL SOURCES (use ONLY these — DO NOT invent URLs). Cite them by 0-based index:\n${realSources.map((s, i) => `[${i}] ${s.title}\n    URL: ${s.url}\n    ${s.snippet}`).join("\n")}`
+      : "";
+
+    const userPrompt = `Simulate: "${scenario}"${branchContext}${sourcesBlock}
 
 Return ONE JSON object, this exact shape:
 {
@@ -60,7 +102,6 @@ Return ONE JSON object, this exact shape:
     "graphReasoningSummary": "1-2 sentences",
     "simulationSummary": "1-2 sentences"
   },
-  "sources": [{"title":"","url":"https://realistic-domain.com/path","snippet":"1 sentence","domain":"realistic-domain.com"}],
   "graph": {
     "nodes": [{"id":"kebab-id","label":"","type":"country|organization|person|event","importance":0.0-1.0}],
     "edges": [{"source":"id","target":"id","type":"ally|enemy|neutral|influence|dependency","strength":0.0-1.0,"label":""}]
@@ -69,7 +110,7 @@ Return ONE JSON object, this exact shape:
     "title":"","probability":"High|Medium|Low","confidence":0-100,
     "summary":"2 sentences","details":"3-4 sentences",
     "chainReactions":["Step 1 → ...","Step 2 → ...","Step 3 → ...","Step 4 → ..."],
-    "reasoning":"reference graph + cite [1][2]","citations":[0,1],
+    "reasoning":"reference graph + cite [0][1] using the source indexes above","citations":[0,1],
     "horizons":{
       "short":{"summary":"weeks","chainReactions":["..."],"intensity":0.0-1.0},
       "mid":{"summary":"months","chainReactions":["..."],"intensity":0.0-1.0},
@@ -80,7 +121,7 @@ Return ONE JSON object, this exact shape:
 
 RULES:
 - Exactly ${numScenarios} scenarios with varying probabilities
-- 4 sources from realistic outlets (reuters.com, ft.com, foreignaffairs.com, brookings.edu, bloomberg.com, csis.org)
+- ${realSources.length ? "DO NOT include a \"sources\" key — sources are supplied externally. Only reference them via the citations array (indexes into the provided list)." : "Include 4 sources from realistic outlets in a \"sources\" array with title/url/snippet/domain."}
 - 6-8 graph nodes, 8-12 edges; edges reference valid node IDs; IDs kebab-case
 - Specific real names and historical parallels
 - confidence is independent of probability tier`;
