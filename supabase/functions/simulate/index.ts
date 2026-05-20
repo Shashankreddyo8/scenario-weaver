@@ -29,7 +29,17 @@ serve(async (req) => {
   }
 
   try {
-    const { scenario, parentScenario, twist } = await req.json();
+    let body: any = {};
+    try {
+      const raw = await req.text();
+      body = raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { scenario, parentScenario, twist } = body;
     if (!scenario || typeof scenario !== "string") {
       return new Response(JSON.stringify({ error: "Missing 'scenario' field" }), {
         status: 400,
