@@ -182,6 +182,11 @@ RULES:
       });
     }
 
+    // Inject real sources from Firecrawl (overrides any model-invented ones)
+    if (realSources.length) {
+      parsed.sources = realSources;
+    }
+
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
