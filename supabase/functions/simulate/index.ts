@@ -47,57 +47,43 @@ serve(async (req) => {
       ? `\n\nThis is a WHAT-IF BRANCH off an existing scenario. Treat this twist as a forced premise that has already happened, then simulate consequences.\n\nParent scenario context:\nTitle: ${parentScenario.title}\nSummary: ${parentScenario.summary}\n\nForced twist (assume this happens): "${twist}"\n\nGenerate ${numScenarios} divergent branch outcomes that flow from this twist.`
       : "";
 
-    const userPrompt = `Run a full multi-agent simulation with graph reasoning, live grounding, and multi-horizon forecasting for:
+    const userPrompt = `Simulate: "${scenario}"${branchContext}
 
-"${scenario}"${branchContext}
-
-Return your analysis as a single JSON object (no markdown, no commentary) with this exact structure:
+Return ONE JSON object, this exact shape:
 {
   "agentOutputs": {
-    "inputAnalysis": "Brief summary of extracted entities, keywords, intent",
-    "knowledgeRetrieved": ["3-5 historical/pattern insights"],
-    "actorsIdentified": [
-      { "name": "Actor name", "role": "Role", "goals": ["..."], "capabilities": ["..."] }
-    ],
-    "actionsPredicted": ["Action 1", "Action 2"],
-    "graphBuilderSummary": "Brief graph construction summary",
-    "graphReasoningSummary": "Clusters, central actors, indirect effects",
-    "simulationSummary": "Brief simulation paths summary"
+    "inputAnalysis": "1-2 sentences",
+    "knowledgeRetrieved": ["3-4 historical/pattern insights"],
+    "actorsIdentified": [{"name":"","role":"","goals":["..."],"capabilities":["..."]}],
+    "actionsPredicted": ["..."],
+    "graphBuilderSummary": "1 sentence",
+    "graphReasoningSummary": "1-2 sentences",
+    "simulationSummary": "1-2 sentences"
   },
-  "sources": [
-    { "title": "Article/report title", "url": "https://realistic-domain.com/path", "snippet": "1-2 sentence relevant excerpt", "domain": "realistic-domain.com" }
-  ],
+  "sources": [{"title":"","url":"https://realistic-domain.com/path","snippet":"1 sentence","domain":"realistic-domain.com"}],
   "graph": {
-    "nodes": [{ "id": "kebab-case-id", "label": "Display Name", "type": "country|organization|person|event", "importance": 0.0-1.0 }],
-    "edges": [{ "source": "node-id", "target": "node-id", "type": "ally|enemy|neutral|influence|dependency", "strength": 0.0-1.0, "label": "..." }]
+    "nodes": [{"id":"kebab-id","label":"","type":"country|organization|person|event","importance":0.0-1.0}],
+    "edges": [{"source":"id","target":"id","type":"ally|enemy|neutral|influence|dependency","strength":0.0-1.0,"label":""}]
   },
-  "scenarios": [
-    {
-      "title": "Short descriptive title",
-      "probability": "High|Medium|Low",
-      "confidence": 0-100,
-      "summary": "2-3 sentence summary",
-      "details": "Detailed 3-5 sentence explanation",
-      "chainReactions": ["Step 1 → Consequence", "Step 2 → ...", "Step 3 → ...", "Step 4 → ..."],
-      "reasoning": "Why this is plausible — reference graph relationships AND cite source indexes like [1] [2]",
-      "citations": [0, 2],
-      "horizons": {
-        "short": { "summary": "Weeks: immediate reactions...", "chainReactions": ["..."], "intensity": 0.0-1.0 },
-        "mid":   { "summary": "Months: structural shifts...",  "chainReactions": ["..."], "intensity": 0.0-1.0 },
-        "long":  { "summary": "Years: systemic outcomes...",   "chainReactions": ["..."], "intensity": 0.0-1.0 }
-      }
+  "scenarios": [{
+    "title":"","probability":"High|Medium|Low","confidence":0-100,
+    "summary":"2 sentences","details":"3-4 sentences",
+    "chainReactions":["Step 1 → ...","Step 2 → ...","Step 3 → ...","Step 4 → ..."],
+    "reasoning":"reference graph + cite [1][2]","citations":[0,1],
+    "horizons":{
+      "short":{"summary":"weeks","chainReactions":["..."],"intensity":0.0-1.0},
+      "mid":{"summary":"months","chainReactions":["..."],"intensity":0.0-1.0},
+      "long":{"summary":"years","chainReactions":["..."],"intensity":0.0-1.0}
     }
-  ]
+  }]
 }
 
 RULES:
-- Generate exactly ${numScenarios} scenarios with varying probabilities
-- Generate 4-6 sources with realistic titles, URLs, and domains (e.g. reuters.com, ft.com, foreignaffairs.com, brookings.edu, bloomberg.com, nytimes.com, csis.org). Sources must look like real articles you'd find via search.
-- Each scenario MUST include "citations" (array of source indexes 0-based into "sources") and "horizons" with all three time horizons
-- Generate 5-10 graph nodes and 8-15 graph edges
-- Node IDs lowercase-kebab-case; edges must reference valid node IDs
-- Make scenarios specific with real names and historical parallels
-- "confidence" reflects how sure you are about THIS specific scenario unfolding (independent of probability tier)`;
+- Exactly ${numScenarios} scenarios with varying probabilities
+- 4 sources from realistic outlets (reuters.com, ft.com, foreignaffairs.com, brookings.edu, bloomberg.com, csis.org)
+- 6-8 graph nodes, 8-12 edges; edges reference valid node IDs; IDs kebab-case
+- Specific real names and historical parallels
+- confidence is independent of probability tier`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -111,7 +97,8 @@ RULES:
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.85,
+        temperature: 0.7,
+        response_format: { type: "json_object" },
       }),
     });
 
