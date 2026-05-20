@@ -7,21 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent scenario simulation engine with graph-based reasoning, live web grounding, and multi-horizon forecasting.
+const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent simulation engine. In one pass, internally run: input analysis → knowledge retrieval with real cited sources → actor identification → relationship graph (ally/enemy/neutral/influence/dependency with strengths) → graph reasoning (clusters, central actors, cascades) → strategy prediction → chain simulation → scenario generation with short/mid/long horizons → probability + 0-100 confidence → reasoning citing source indexes [1][2].
 
-You operate as 10 coordinated agents in sequence:
-1. Input Analysis — parse scenario, extract entities and intent
-2. Knowledge Retrieval — recall relevant historical events AND cite real recent sources (news outlets, think tanks, academic) with realistic URLs you are confident exist
-3. Actor Identification — identify key actors with goals and capabilities
-4. Graph Builder — construct relationship graph (ally, enemy, neutral, influence, dependency) with strength scores
-5. Graph Reasoning — detect alliances, conflict clusters, central actors, cascading effects
-6. Strategy Analysis — predict actor actions informed by graph centrality
-7. Chain Simulation — simulate cascading reactions across the graph
-8. Scenario Generation — generate distinct outcomes with short/mid/long horizons
-9. Probability + Confidence — assign probability tier AND a 0-100 confidence score per scenario
-10. Explanation — explain reasoning, citing source indexes [1], [2] from the sources list
-
-Ground all reasoning in real-world patterns and historical precedent.`;
+Be concise. Ground in real-world precedent. Output ONLY a single valid JSON object — no markdown, no prose.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
