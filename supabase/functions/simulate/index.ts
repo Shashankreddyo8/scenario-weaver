@@ -89,7 +89,17 @@ serve(async (req) => {
       ? `\n\nREAL SOURCES (use ONLY these — DO NOT invent URLs). Cite them by 0-based index:\n${realSources.map((s, i) => `[${i}] ${s.title}\n    URL: ${s.url}\n    ${s.snippet}`).join("\n")}`
       : "";
 
-    const userPrompt = `Simulate: "${scenario}"${branchContext}${sourcesBlock}
+    const userPrompt = `USER SCENARIO (the single source of truth for this simulation):
+"""
+${scenario}
+"""
+
+CONTEXT ANCHORING (highest priority):
+- Infer the domain, geography, timeframe, scale and named entities directly from the user scenario above. Do NOT drift into a different domain (e.g. do not turn a public-health or business prompt into a geopolitical war).
+- Every actor, graph node, chain reaction and horizon must be plausibly involved in THIS scenario. No generic filler actors.
+- Reuse the user's own terminology and named entities verbatim where they appear.
+- If the prompt is vague, state the assumptions you adopt in "inputAnalysis" and keep them consistent everywhere else.
+- Match the scope of the prompt: a local/organizational scenario stays local; a global one stays global.${branchContext}${sourcesBlock}
 
 Return ONE JSON object, this exact shape:
 {
