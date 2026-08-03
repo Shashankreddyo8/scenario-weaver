@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent simulation engine. In one pass, internally run: input analysis → knowledge retrieval with real cited sources → actor identification → relationship graph (ally/enemy/neutral/influence/dependency with strengths) → graph reasoning (clusters, central actors, cascades) → strategy prediction → chain simulation → scenario generation with short/mid/long horizons → probability + 0-100 confidence → reasoning citing source indexes [1][2].
 
-Be concise. Ground in real-world precedent. Output ONLY a single valid JSON object — no markdown, no prose.`;
+Every output must stay strictly inside the domain, geography, timeframe and entities of the user's scenario text. Never substitute a generic geopolitical template for the user's actual topic. Be concise. Ground in real-world precedent. Output ONLY a single valid JSON object — no markdown, no prose.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
