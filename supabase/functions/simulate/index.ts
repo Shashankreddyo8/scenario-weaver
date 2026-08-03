@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const SYSTEM_PROMPT = `You are ScenarioMind, a multi-agent simulation engine. In one pass, internally run: input analysis → knowledge retrieval with real cited sources → actor identification → relationship graph (ally/enemy/neutral/influence/dependency with strengths) → graph reasoning (clusters, central actors, cascades) → strategy prediction → chain simulation → scenario generation with short/mid/long horizons → probability + 0-100 confidence → reasoning citing source indexes [1][2].
 
-Be concise. Ground in real-world precedent. Output ONLY a single valid JSON object — no markdown, no prose.`;
+Every output must stay strictly inside the domain, geography, timeframe and entities of the user's scenario text. Never substitute a generic geopolitical template for the user's actual topic. Be concise. Ground in real-world precedent. Output ONLY a single valid JSON object — no markdown, no prose.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -89,7 +89,17 @@ serve(async (req) => {
       ? `\n\nREAL SOURCES (use ONLY these — DO NOT invent URLs). Cite them by 0-based index:\n${realSources.map((s, i) => `[${i}] ${s.title}\n    URL: ${s.url}\n    ${s.snippet}`).join("\n")}`
       : "";
 
-    const userPrompt = `Simulate: "${scenario}"${branchContext}${sourcesBlock}
+    const userPrompt = `USER SCENARIO (the single source of truth for this simulation):
+"""
+${scenario}
+"""
+
+CONTEXT ANCHORING (highest priority):
+- Infer the domain, geography, timeframe, scale and named entities directly from the user scenario above. Do NOT drift into a different domain (e.g. do not turn a public-health or business prompt into a geopolitical war).
+- Every actor, graph node, chain reaction and horizon must be plausibly involved in THIS scenario. No generic filler actors.
+- Reuse the user's own terminology and named entities verbatim where they appear.
+- If the prompt is vague, state the assumptions you adopt in "inputAnalysis" and keep them consistent everywhere else.
+- Match the scope of the prompt: a local/organizational scenario stays local; a global one stays global.${branchContext}${sourcesBlock}
 
 Return ONE JSON object, this exact shape:
 {
@@ -120,10 +130,10 @@ Return ONE JSON object, this exact shape:
 }
 
 RULES:
-- Exactly ${numScenarios} scenarios with varying probabilities
+- Exactly ${numScenarios} scenarios with varying probabilities, all directly about the user scenario
 - ${realSources.length ? "DO NOT include a \"sources\" key — sources are supplied externally. Only reference them via the citations array (indexes into the provided list)." : "Include 4 sources from realistic outlets in a \"sources\" array with title/url/snippet/domain."}
 - 6-8 graph nodes, 8-12 edges; edges reference valid node IDs; IDs kebab-case
-- Specific real names and historical parallels
+- Specific real names, entities and historical parallels relevant to the user's domain
 - confidence is independent of probability tier`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
