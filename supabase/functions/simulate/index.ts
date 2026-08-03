@@ -130,10 +130,10 @@ Return ONE JSON object, this exact shape:
 }
 
 RULES:
-- Exactly ${numScenarios} scenarios with varying probabilities
+- Exactly ${numScenarios} scenarios with varying probabilities, all directly about the user scenario
 - ${realSources.length ? "DO NOT include a \"sources\" key — sources are supplied externally. Only reference them via the citations array (indexes into the provided list)." : "Include 4 sources from realistic outlets in a \"sources\" array with title/url/snippet/domain."}
 - 6-8 graph nodes, 8-12 edges; edges reference valid node IDs; IDs kebab-case
-- Specific real names and historical parallels
+- Specific real names, entities and historical parallels relevant to the user's domain
 - confidence is independent of probability tier`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
